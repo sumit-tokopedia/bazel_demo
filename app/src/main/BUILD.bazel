@@ -1,0 +1,23 @@
+load("@build_bazel_rules_android//android:rules.bzl", "android_binary", "android_library")
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+
+kt_jvm_library(
+    name = "kotlin",
+    srcs = glob(["java/com/example/crashactivity/*.kt"]),
+)
+
+android_library(
+    name = "main",
+    manifest = "AndroidManifest.xml",
+    resource_files = glob(["res/**"]),
+     deps = ["@maven//:androidx_appcompat_appcompat"],
+)
+
+android_binary(
+    name = "media",
+    manifest = "AndroidManifest.xml",
+    deps = [
+        ":kotlin",
+        ":main",
+    ],
+)
