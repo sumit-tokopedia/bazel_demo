@@ -1,39 +1,30 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary", "android_library")
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_android_library", "kt_compiler_plugin", "kt_jvm_import")
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_android_library", "kt_compiler_plugin", "kt_jvm_import", "kt_jvm_library")
+load("@dagger//:workspace_defs.bzl", "dagger_rules")
 
-kt_jvm_import(
-    name = "android_extensions_compiler",
-    jars = ["kotlin_android_extensions.jar"],
-    neverlink = 1,
-)
-
-kt_jvm_import(
-    name = "android_compiler",
-    jars = ["kotlin-compiler-embeddable-1.3.0.jar"],
-    neverlink = 1,
-)
-
-kt_compiler_plugin(
-    name = "open_for_testing_plugin",
-    deps = [
-        ":android_compiler",
-        ":android_extensions_compiler",
-    ],
-)
+dagger_rules()
 
 kt_android_library(
     name = "kotlin",
     srcs = glob(["java/com/example/crashactivity/*.kt"]),
     custom_package = "com.example.crashactivity",
     manifest = "AndroidManifest.xml",
-    #    plugins = [
-    #        ":open_for_testing_plugin",
-    #    ],
     resource_files = glob(["res/**"]),
     deps = [
+        ":java",
         "@maven//:androidx_appcompat_appcompat",
         "@maven//:androidx_constraintlayout_constraintlayout",
         "@maven//:org_jetbrains_kotlin_kotlin_stdlib",
+    ],
+)
+
+android_library(
+    name = "java",
+    srcs = glob(["java/com/example/crashactivity/*.java"]),
+    deps = [
+        ":dagger",  # For Dagger
+        ":dagger-producers",  # For Dagger Producers
+        ":dagger-spi",  # For Dagger SPI
     ],
 )
 
@@ -41,6 +32,7 @@ android_binary(
     name = "media",
     custom_package = "com.example.crashactivity",
     manifest = "AndroidManifest.xml",
+    multidex = "native",
     deps = [
         ":kotlin",
         "@maven//:androidx_appcompat_appcompat",
