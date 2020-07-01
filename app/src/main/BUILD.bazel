@@ -1,15 +1,23 @@
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary", "android_library")
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_android_library", "kt_compiler_plugin")
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_android_library", "kt_compiler_plugin", "kt_jvm_import")
+
+kt_jvm_import(
+    name = "android_extensions_compiler",
+    jars = ["kotlin_android_extensions.jar"],
+    neverlink = 1,
+)
+
+kt_jvm_import(
+    name = "android_compiler",
+    jars = ["kotlin-compiler-embeddable-1.3.0.jar"],
+    neverlink = 1,
+)
 
 kt_compiler_plugin(
     name = "open_for_testing_plugin",
-    options = {
-        "annotation": "plugin.allopen.OpenForTesting",
-    },
     deps = [
-        "@com_github_jetbrains_kotlin//:allopen-compiler-plugin",
-        "@maven//:org_jetbrains_kotlin_kotlin_android_extensions",
-        "@maven//:org_jetbrains_kotlin_kotlin_compiler_embeddable",
+        ":android_compiler",
+        ":android_extensions_compiler",
     ],
 )
 
@@ -18,9 +26,9 @@ kt_android_library(
     srcs = glob(["java/com/example/crashactivity/*.kt"]),
     custom_package = "com.example.crashactivity",
     manifest = "AndroidManifest.xml",
-    plugins = [
-        ":open_for_testing_plugin",
-    ],
+    #    plugins = [
+    #        ":open_for_testing_plugin",
+    #    ],
     resource_files = glob(["res/**"]),
     deps = [
         "@maven//:androidx_appcompat_appcompat",
